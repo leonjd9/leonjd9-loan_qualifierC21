@@ -1,13 +1,9 @@
 from pathlib import Path
-# import fire
-
-#########
-
+import fire
 import questionary
 
-from questionary.constants import YES
-# import sys
 from qualifier.utils.fileio import load_csv
+
 
 from qualifier.utils.calculators import (
     calculate_monthly_debt_ratio,
@@ -18,10 +14,29 @@ from qualifier.utils.filters.debit_to_income import filter_debt_to_income
 from qualifier.utils.filters.loan_to_value import filter_loan_to_value
 from qualifier.utils.filters.max_loan import filter_max_loan_size
 from questionary.constants import YES
+
 def load_bank_data(file_path):
     csvpath = Path(file_path)
     return load_csv(csvpath)
+    
 
+    #Questionary collects user's loan info
+def get_applicant_info():
+    credit_score = questionary.text("What's your credit score?").ask()
+    debt = questionary.text("What's your current amount of monthly debt?").ask()
+    income = questionary.text("What's your total monthly income?").ask()
+    loan_amount = questionary.text("What's your desired loan amount?").ask()
+    home_value = questionary.text("What's your home value?").ask()
+
+    credit_score = int(credit_score)
+    debt = float(debt)
+    income = float(income)
+    loan_amount = float(loan_amount)
+    home_value = float(home_value)
+
+    return credit_score, debt, income, loan_amount, home_value
+
+    #Calculates debt & loan to value ratios and filters qualifyng loans bas on results.
 
 def find_qualifying_loans(bank_data, credit_score, debt, income, loan, home_value):
 
@@ -43,48 +58,43 @@ def find_qualifying_loans(bank_data, credit_score, debt, income, loan, home_valu
 
     return bank_data_filtered
 
-
-# The main function for running the script.
-def run():
-
-    # Load the latest Bank data
-    bank_data = load_bank_data("./data/daily_rate_sheet.csv")
-
-    # Set the applicant's information
-    credit_score = 750
-    debt = 5000
-    income = 20000
-    loan_amount = 100000
-    home_value = 210000
-
-    # Find qualifying loans
-    qualifying_loans = find_qualifying_loans(
-        bank_data, credit_score, debt, income, loan_amount, home_value
-    )
-
+#     #Saves qualifing loans and asks user to confirm printing of loan lists
 
 def save_qualifying_loans(qualifying_loans):
     
-    if qualifying_loans:
+    Print_confirm = questionary.confirm("Would you like to print your qualified loans?").ask()
     
-        Print_question = questionary.confirm("Would you like to print your qualified loans?").ask()
-
-        if Print_question =="yes" :
-
-            with open(cvspath,"w") as csvfile:
-                csvwriter = csvwriter(csvfile, delimiter=",")
-                csvwriter.writerow(header)
-                for loans in qualifying_loans:
-                    csvwriter.writerow(loans)
-                
-                header = ["Lender,Max Loan Amount","Max LTV,Max DTI,Min Credit Score","Interest Rate"]
-            
-                cvspath = (r"C:\Users\javyl\Desktop\loan_qualifierC2\qualified_loan_list_print")
-        else:
-            print("Thank you")
+    if Print_confirm == True:
+        
+        with open(output_path,"w",) as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=",")
+            csvwriter.writerow(header)
+            for loans in qualifying_loans:
+                csvwriter.writerow(loans.values()) 
+            print("Please take your qualified loan list")        
+        output_path = Path("your_qualified_loans.csv")    
+        header = ["Lender,Max Loan Amount","Max LTV,Max DTI,Min Credit Score","Interest Rate"]
+                      
     else: 
         print("Thank you.")
 
 
+# # The main function for running the script.
+
+def run():
+    
+    # Load Bank data
+    bank_data = load_bank_data()
+
+    # Get the applicant's information
+    credit_score, debt, income, loan_amount, home_value = get_applicant_info()
+
+    # Filter qualifying loans
+    qualifying_loans = find_qualifying_loans(
+        bank_data, credit_score, debt, income, loan_amount, home_value)
+    #Save csv questionalry fundction
+    save_qualifying_loans = qualifying_loans
+
+
 if __name__ == "__main__":
-    run()
+    (run)
