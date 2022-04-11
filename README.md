@@ -12,7 +12,8 @@ In order to run the application the following dependencies are required:
 Python
 questionary 1.5.2
 fire-0.4.
-
+file location
+*[Git web location](https://github.com/leonjd9/leonjd9-loan_qualifierC21) - For files and dependencies Fire & questionary
 
 ## Contributors
 Javier Leon
